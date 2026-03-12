@@ -1,8 +1,9 @@
 name: 'CI/CD For 3-Tier MERN Stack App'
 
 on: 
-  #- push
-  - workflow_dispatch
+   push:
+      branches: [main]
+   workflow_dispatch:
 
 env:
   region: 'ap-south-1'

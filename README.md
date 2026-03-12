@@ -1,4 +1,4 @@
-#  3-Tier MERN Stack Application: DevOps & CI/CD Portfolio Project
+#  3-Tier MERN Stack Application: End To End CI/CD Project
 
 ![Architecture: 3-Tier](https://img.shields.io/badge/Architecture-3--Tier-blue)
 ![Containerization: Docker](https://img.shields.io/badge/Containerization-Docker-2496ED?logo=docker&logoColor=white)

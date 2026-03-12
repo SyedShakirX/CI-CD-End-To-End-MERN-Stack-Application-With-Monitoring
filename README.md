@@ -5,6 +5,8 @@
 ![Orchestration: Kubernetes](https://img.shields.io/badge/Orchestration-Kubernetes-326CE5?logo=kubernetes&logoColor=white)
 ![CI/CD: GitHub Actions](https://img.shields.io/badge/CI%2FCD-GitHub_Actions-2088FF?logo=github-actions&logoColor=white)
 ![Security: Docker Scout](https://img.shields.io/badge/Security-Docker_Scout-0db7ed?logo=docker&logoColor=white)
+![Monitoring: Prometheus](https://img.shields.io/badge/Monitoring-Prometheus-E6522C?logo=prometheus&logoColor=white)
+![Dashboards: Grafana](https://img.shields.io/badge/Dashboards-Grafana-F46800?logo=grafana&logoColor=white)
 
 A production-ready, highly available 3-tier web application fully containerized and orchestrated via Kubernetes. This repository demonstrates end-to-end DevOps practices, including multi-stage Docker builds, Kubernetes stateful/stateless deployments, security scanning, and automated CI/CD pipelines using GitHub Actions and AWS ECR.
 
@@ -13,6 +15,14 @@ A production-ready, highly available 3-tier web application fully containerized 
 ##  Architecture Overview
 
 The application is decoupled into three distinct layers, deployed within a dedicated Kubernetes namespace (`three-tier-app`), ensuring scalability, security, and independent lifecycle management.
+
+##  Observability & Monitoring Strategy
+
+To maintain high availability and proactively monitor system health, a comprehensive monitoring stack is deployed alongside the application:
+
+* **Node Exporter:** Deployed as a Kubernetes `DaemonSet` to ensure it runs on every node in the cluster. It exposes vital hardware and OS-level metrics (CPU, memory, disk I/O, network pressure).
+* **Prometheus:** Acts as the central metrics server, configured to systematically scrape time-series data from the Node Exporter targets and Kubernetes internal components.
+* **Grafana:** Connected directly to Prometheus as its primary data source. Used to build rich, dynamic dashboards that visualize application performance, resource bottlenecks, and database health in real-time.
 
 * **Tier 1: Frontend (Presentation Layer)**
     * Static assets (HTML, CSS, JS) served via a lightweight Nginx web server.
@@ -26,6 +36,10 @@ The application is decoupled into three distinct layers, deployed within a dedic
     * MongoDB container managed by a Kubernetes `StatefulSet` ensuring data consistency and stable network identities.
     * Headless Service (`mongo-svc`) for internal cluster DNS resolution.
     * Persistent data storage utilizing a `PersistentVolume` (PV) and `PersistentVolumeClaim` (PVC) bound to host storage.
+* **Tier 4: Observability (Monitoring Layer)**
+    * Prometheus for scraping and storing time-series metrics.
+    * Node Exporter acting as the primary data source for host-level metrics.
+    * Grafana for visualizing cluster health and performance telemetry.
 
 ---
 
@@ -54,6 +68,9 @@ All resources are encapsulated in the `three-tier-app` namespace.
 | **Database** | `StatefulSet` | 1 Replica, uses `mongo:6`, mounts `/data/db` |
 | **Database Network**| `Service` | Type: `ClusterIP` (None/Headless), Port: `27017` |
 | **Storage** | `PV` / `PVC` | 3Gi Capacity, `ReadWriteOnce`, HostPath backing. |
+| **Node Exporter** | `DaemonSet` | Runs on all nodes, exposes port `9100` |
+| **Prometheus** | `Deployment` | Scrapes Node Exporter, stores metrics |
+| **Grafana** | `Deployment` | Connects to Prometheus, visualizes data |
 
 > ** Infrastructure Note:** The `PersistentVolume` (mongodb-pv) is an infrastructure-level resource and must be provisioned on the cluster *prior* to running the CI/CD pipeline.
 

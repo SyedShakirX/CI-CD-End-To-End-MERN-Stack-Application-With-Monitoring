@@ -30,11 +30,30 @@ jobs:
         run: |
           aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/f9w4b6z1
 
+      - name: 'Login to Docker Hub (Required for Docker Scout)'
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_API_TOKEN }}
 
-      - name: 'Build And Push Frontend'
+
+      - name: 'Build Frontend Image'
         run: | 
 
           docker build -t mern-stack-frontend frontend
+
+      - name: 'Docker Scout Scan: Frontend'
+        uses: docker/scout-action@v1
+        with:
+          command: cves
+          image: mern-stack-frontend:latest
+          ignore-base: true # Ignores base OS vulnerabilities but scans our code
+          only-severities: critical,high #Severity type
+          exit-code: true # Fails the pipeline if critical/high vulnerabilities are found
+          
+
+      - name: 'Tag And Push Secure Frontend Image'
+        run: |
 
           docker tag mern-stack-frontend:latest public.ecr.aws/f9w4b6z1/mern-stack-frontend:latest
 
@@ -44,10 +63,24 @@ jobs:
           sleep 2
 
 
-      - name: 'Build And Push Backend'
+      - name: 'Build Backend Image'
         run: |
           
           docker build -t mern-stack-backend backend
+
+        
+      - name: 'Docker Scout Scan: Backend'
+        uses: docker/scout-action@v1
+        with:
+          command: cves
+          image: mern-stack-backend:latest
+          ignore-base: true 
+          only-severities: critical,high 
+          exit-code: true 
+      
+      
+      - name: 'Tag And Push Secure Backend Image'
+        run: | 
 
           docker tag mern-stack-backend:latest public.ecr.aws/f9w4b6z1/mern-stack-backend:latest
 

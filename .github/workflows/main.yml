@@ -1,3 +1,5 @@
+name: 'CI/CD For 3-Tier MERN Stack App'
+
 on: 
   #- push
   - workflow_dispatch

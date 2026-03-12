@@ -11,18 +11,9 @@
 A production-ready, highly available 3-tier web application fully containerized and orchestrated via Kubernetes. This repository demonstrates end-to-end DevOps practices, including multi-stage Docker builds, Kubernetes stateful/stateless deployments, security scanning, and automated CI/CD pipelines using GitHub Actions and AWS ECR.
 
 ---
-
 ##  Architecture Overview
 
 The application is decoupled into three distinct layers, deployed within a dedicated Kubernetes namespace (`three-tier-app`), ensuring scalability, security, and independent lifecycle management.
-
-##  Observability & Monitoring Strategy
-
-To maintain high availability and proactively monitor system health, a comprehensive monitoring stack is deployed alongside the application:
-
-* **Node Exporter:** Deployed as a Kubernetes `DaemonSet` to ensure it runs on every node in the cluster. It exposes vital hardware and OS-level metrics (CPU, memory, disk I/O, network pressure).
-* **Prometheus:** Acts as the central metrics server, configured to systematically scrape time-series data from the Node Exporter targets and Kubernetes internal components.
-* **Grafana:** Connected directly to Prometheus as its primary data source. Used to build rich, dynamic dashboards that visualize application performance, resource bottlenecks, and database health in real-time.
 
 * **Tier 1: Frontend (Presentation Layer)**
     * Static assets (HTML, CSS, JS) served via a lightweight Nginx web server.
@@ -42,6 +33,15 @@ To maintain high availability and proactively monitor system health, a comprehen
     * Grafana for visualizing cluster health and performance telemetry.
 
 ---
+
+##  Observability & Monitoring Strategy
+
+To maintain high availability and proactively monitor system health, a comprehensive monitoring stack is deployed alongside the application:
+
+* **Node Exporter:** Deployed as a Kubernetes `DaemonSet` to ensure it runs on every node in the cluster. It exposes vital hardware and OS-level metrics (CPU, memory, disk I/O, network pressure).
+* **Prometheus:** Acts as the central metrics server, configured to systematically scrape time-series data from the Node Exporter targets and Kubernetes internal components.
+* **Grafana:** Connected directly to Prometheus as its primary data source. Used to build rich, dynamic dashboards that visualize application performance, resource bottlenecks, and database health in real-time.
+
 
 ##  Containerization Strategy
 

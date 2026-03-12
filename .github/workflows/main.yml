@@ -1,5 +1,5 @@
 on: 
-  - push
+  #- push
   - workflow_dispatch
 
 env:
@@ -10,14 +10,106 @@ jobs:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: 'Checkout Repo'
+
+      - name: 'Checkout Repo For Github-Hosted Runner'
         uses: actions/checkout@v4
+
 
       - name: 'Login To AWS'
         uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{env.region }}
+          aws-region: ${{ env.region }}
+
+
+      - name: Generate Authentication Token
+        run: |
+          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/f9w4b6z1
+
+
+      - name: 'Build And Push Frontend'
+        run: | 
+
+          docker build -t mern-stack-frontend frontend
+
+          docker tag mern-stack-frontend:latest public.ecr.aws/f9w4b6z1/mern-stack-frontend:latest
+
+          docker push public.ecr.aws/f9w4b6z1/mern-stack-frontend:latest
+
+          echo "Frontend Image Build & Pushed Successfully"
+          sleep 2
+
+
+      - name: 'Build And Push Backend'
+        run: |
+          
+          docker build -t mern-stack-backend backend
+
+          docker tag mern-stack-backend:latest public.ecr.aws/f9w4b6z1/mern-stack-backend:latest
+
+          docker push public.ecr.aws/f9w4b6z1/mern-stack-backend:latest
+
+          echo "Backend Image Build & Pushed Successfully"
+          sleep 2
+
+
+      - name: 'Remove Images From The Runner'
+        run: |
+          docker rmi -f public.ecr.aws/f9w4b6z1/mern-stack-frontend:latest
+
+          docker rmi -f public.ecr.aws/f9w4b6z1/mern-stack-backend:latest
+
+      
+
+  ContiniousDeployment:
+    runs-on: self-hosted
+    needs: ContiniousIntegration
+
+    steps:
+
+      - name: 'Checkout Repo For Self-Hosted Runner'
+        uses: actions/checkout@v4
+
+
+      - name: 'Login To AWS'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.region }}
+
+
+      - name: 'Pull Frontend, Backend & MongoDB From ECR'
+        run: |
+          sudo docker pull public.ecr.aws/f9w4b6z1/mern-stack-frontend:latest
+          sudo docker pull public.ecr.aws/f9w4b6z1/mern-stack-backend:latest
+          sudo docker pull mongo:6
+
+        #Keep persistent volume ready as it is not a part of CI/CDpipeline, Its an infrastructure resource.
+
+      - name: 'Creating A Namespace'
+        run: |
+          kubectl apply -f namespace.yaml
+          kubectl config set-context --current --namespace=three-tier-app
+
+
+
+      - name: 'Creating A PersistentVolumeClaim & Deploying The Database'
+        run: |
+          kubectl apply -f persistent-volume-claim.yaml
+          kubectl apply -f mongodb-statefulset.yaml
+  
+
+      - name: 'Deploying The Frontend'
+        run: |
+          kubectl apply -f frontend/frontend-deployment.yaml
+          kubectl apply -f frontend/frontend-service.yaml 
+
+
+      - name: 'Deploying The Backend'
+        run: |
+          kubectl apply -f backend/backend-deployment.yaml
+          kubectl apply -f backend/backend-service.yaml
 
       

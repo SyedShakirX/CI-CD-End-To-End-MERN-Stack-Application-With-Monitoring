@@ -80,6 +80,12 @@ jobs:
           aws-region: ${{ env.region }}
 
 
+      - name: 'AWS ECR Login'  # Translates AWS credentials into Docker authentication
+        run: |
+          aws ecr-public get-login-password --region us-east-1 | \
+          docker login --username AWS --password-stdin public.ecr.aws/f9w4b6z1
+
+
       - name: 'Pull Frontend, Backend & MongoDB From ECR'
         run: |
           docker pull public.ecr.aws/f9w4b6z1/mern-stack-frontend:latest

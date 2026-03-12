@@ -82,9 +82,9 @@ jobs:
 
       - name: 'Pull Frontend, Backend & MongoDB From ECR'
         run: |
-          sudo docker pull public.ecr.aws/f9w4b6z1/mern-stack-frontend:latest
-          sudo docker pull public.ecr.aws/f9w4b6z1/mern-stack-backend:latest
-          sudo docker pull mongo:6
+          docker pull public.ecr.aws/f9w4b6z1/mern-stack-frontend:latest
+          docker pull public.ecr.aws/f9w4b6z1/mern-stack-backend:latest
+          docker pull mongo:6
 
         #Keep persistent volume ready as it is not a part of CI/CDpipeline, Its an infrastructure resource.
 
@@ -109,11 +109,13 @@ jobs:
         run: |
           kubectl apply -f frontend/frontend-deployment.yaml
           kubectl apply -f frontend/frontend-service.yaml 
+          kubectl rollout restart deployment/frontend-deployment -n three-tier-app
+
 
 
       - name: 'Deploying The Backend'
         run: |
           kubectl apply -f backend/backend-deployment.yaml
           kubectl apply -f backend/backend-service.yaml
-
+          kubectl rollout restart deployment/backend-deployment -n three-tier-app
       

@@ -1,0 +1,23 @@
+on: 
+  - push
+  - workflow_dispatch
+
+env:
+  region: 'ap-south-1'
+
+jobs:
+  ContiniousIntegration:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: 'Checkout Repo'
+        uses: actions/checkout@v4
+
+      - name: 'Login To AWS'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{env.region }}
+
+      

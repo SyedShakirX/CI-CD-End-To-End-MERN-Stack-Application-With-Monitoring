@@ -128,7 +128,7 @@ jobs:
           docker pull public.ecr.aws/f9w4b6z1/mern-stack-backend:latest
           docker pull mongo:6
 
-        #Keep persistent volume ready as it is not a part of CI/CDpipeline, Its an infrastructure resource.
+        #Keep persistent volume ready as it is not a part of CI/CD pipeline, Its an infrastructure resource.
 
       - name: 'Creating A Namespace'
         run: |
